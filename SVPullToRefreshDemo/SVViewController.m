@@ -47,16 +47,18 @@ static int initialPage = 1;
     
     
     // refresh new data when pull the table list
-    [self.tableView addPullToRefreshWithActionHandler:^{
-        weakSelf.currentPage = initialPage; // reset the page
-        [weakSelf.dataSource removeAllObjects]; // remove all data
-        [weakSelf.tableView reloadData]; // before load new content, clear the existing table list
-        [weakSelf loadFromServer]; // load new data
-        [weakSelf.tableView.pullToRefreshView stopAnimating]; // clear the animation
-        
-        // once refresh, allow the infinite scroll again
-        weakSelf.tableView.showsInfiniteScrolling = YES;
-    }];
+//    [self.tableView addPullToRefreshWithActionHandler:^{
+//       
+//    }];
+    
+    weakSelf.currentPage = initialPage; // reset the page
+    [weakSelf.dataSource removeAllObjects]; // remove all data
+    [weakSelf.tableView reloadData]; // before load new content, clear the existing table list
+    [weakSelf loadFromServer]; // load new data
+    [weakSelf.tableView.pullToRefreshView stopAnimating]; // clear the animation
+    
+    // once refresh, allow the infinite scroll again
+    weakSelf.tableView.showsInfiniteScrolling = YES;
     
     // load more content when scroll to the bottom most
     [self.tableView addInfiniteScrollingWithActionHandler:^{
@@ -66,7 +68,9 @@ static int initialPage = 1;
 
 - (void)loadFromServer
 {
-    NSInteger start = 0*_currentPage;
+    NSInteger start = _currentPage*5-5;
+    NSInteger end = start+5;
+    NSLog(@"start...%d,,,End...%d",start,end);
     
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
     [dict setValue:@"AiK58j67" forKey:@"api_key"];
@@ -74,9 +78,9 @@ static int initialPage = 1;
     [dict setValue:@"naveendungarwal2009@gmail.com" forKey:@"email"];
     [dict setValue:@"12.23" forKey:@"lat"];
     [dict setValue:@"72.54" forKey:@"lon"];
-    [dict setValue:@"5000" forKey:@"radius"];
+    [dict setValue:@"99999" forKey:@"radius"];
     [dict setValue:[NSString stringWithFormat:@"%ld",(long)start] forKey:@"start"];
-    [dict setValue:@"5" forKey:@"end"];
+    [dict setValue:[NSString stringWithFormat:@"%ld",(long)end] forKey:@"end"];
     
     AFHTTPRequestOperationManager *manager = [AFHTTPRequestOperationManager manager];
     manager.responseSerializer.acceptableContentTypes = [manager.responseSerializer.acceptableContentTypes setByAddingObject:@"application/json"];
@@ -106,6 +110,7 @@ static int initialPage = 1;
         [self reloadTableView:currentRow];
         
         // clear the pull to refresh & infinite scroll, this 2 lines very important
+    
         [self.tableView.pullToRefreshView stopAnimating];
         [self.tableView.infiniteScrollingView stopAnimating];
         
@@ -117,6 +122,7 @@ static int initialPage = 1;
 
 - (void)reloadTableView:(NSInteger)startingRow;
 {
+    NSLog(@"curren row..%ld",(long)startingRow);
     // the last row after added new items
     NSInteger endingRow = [self.dataSource count];
     
